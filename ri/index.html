@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script src="../behavior.js"></script>
+        <script src="viewport.js"></script>
+        <script>
+            Ri(function() {
+                var right = Ri.behavior(function() {
+                    return Ri.mouseX() >= Ri.innerWidth() / 2;
+                });
+                
+                var mouse = Ri.behavior(function() {
+                    return {
+                        x: Ri.mouseX(),
+                        y: Ri.mouseY()
+                    };
+                });
+                
+                var rightEvent = Ri.behavior.bind(right, function(right) {
+                    $('#value').text(right ? "right" : "left");
+                });
+
+                Ri.behavior.bind(mouse, function(mouse) {
+                    $('#mouse').text(JSON.stringify(mouse));
+                });
+                
+                Ri.behavior.on(Ri.mouseLeft, function() {
+                    Ri.behavior.off(rightEvent);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id="value"></div>
+        <div id="mouse"></div>
+    </body>
+</html>
+
