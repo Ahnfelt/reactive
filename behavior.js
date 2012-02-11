@@ -70,7 +70,8 @@ function createReactiveBehaviorModule() {
                 behavior.downstream[streamKey].computed = false;
             }
             for(streamKey in behavior.downstream) {
-                module.recompute(behavior.downstream[streamKey]);
+                var downstream = behavior.downstream[streamKey];
+                if(!downstream.computed) module.recompute(downstream);
             }
             for(listenerKey in behavior.listeners) {
                 behavior.listeners[listenerKey](value);
