@@ -6,22 +6,39 @@ function createReactiveBehaviorModule() {
     // PRIVATE
     
     var nextId = 0;
+    var target = undefined;
 
     function read(behavior) {
-        if(Ri.target !== undefined) {
-            behavior.downstream['behavior-' + Ri.target.id] = Ri.target;
-            Ri.target.upstream['behavior-' + behavior.id] = behavior;
+        if(target !== undefined) {
+            behavior.downstream['behavior-' + target.id] = target;
+            target.upstream['behavior-' + behavior.id] = behavior;
         }
         if(!behavior.computed) {
             unstream(behavior);
-            var oldTarget = Ri.target;
-            Ri.target = behavior;
-            behavior.cached = behavior.computation.call(behavior.thisPointer);
+            var oldTarget = target;
+            target = behavior;
+            var value = behavior.computation.call(behavior.thisPointer);
+            target = oldTarget;
             behavior.computed = true;
-            Ri.target = oldTarget;
+            if(behavior.cached !== value) {
+                behavior.cached = value;
+                notify(behavior);
+            }
         }
         return behavior.cached;
-    };
+    }
+    
+    function notify(behavior) {
+        for(streamKey in behavior.downstream) {
+            behavior.downstream[streamKey].computed = false;
+        }
+        for(streamKey in behavior.downstream) {
+            read(behavior.downstream[streamKey]);
+        }
+        for(listenerKey in behavior.listeners) {
+            behavior.listeners[listenerKey](behavior.cached);
+        }
+    }
 
     function unstream(behavior) {
         for(key in behavior.upstream) {
@@ -62,21 +79,8 @@ function createReactiveBehaviorModule() {
     
     // Forces a recomputation of the specified behavior.
     module.recompute = function(behavior) {
-        var cached = behavior.cached;
         behavior.computed = false;
-        var value = read(behavior);
-        if(cached !== value) {
-            for(streamKey in behavior.downstream) {
-                behavior.downstream[streamKey].computed = false;
-            }
-            for(streamKey in behavior.downstream) {
-                var downstream = behavior.downstream[streamKey];
-                if(!downstream.computed) module.recompute(downstream);
-            }
-            for(listenerKey in behavior.listeners) {
-                behavior.listeners[listenerKey](value);
-            }
-        }
+        return read(behavior);
     };
 
     // Adds an event handler that is executed every time the value
