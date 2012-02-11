@@ -1,0 +1,78 @@
+<!doctype HTML>
+<html>
+<head>
+    <title>Callbacks are so last week</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="reacell.js"></script>
+
+    <style>
+        .invalid {
+            border: 2px solid red;
+        }
+        #orangeBox {
+            background: orange;
+            font-weight: bold;
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        jQuery(document).ready(function(){
+            var mousePositionTextCell = Cell(function (p) {return "(" + p.left + ", " + p.top + ")"}, Cell.auto.mousePosition);
+            $("#cursorPosition").text(mousePositionTextCell);
+
+            var nameCell = $("#nameField").valCell();
+            var emailCell = $("#emailField").valCell();
+            var invalidNameCell = Cell(function (name) {return name == ""}, nameCell);
+            var invalidEmailCell = Cell(function (email) {return email.indexOf("@") == -1}, emailCell);
+            var invalidFormCell = Cell.or(invalidNameCell, invalidEmailCell);
+            $("#nameField").toggleClass("invalid", invalidNameCell);
+            $("#emailField").toggleClass("invalid", invalidEmailCell);
+            $("fieldset").toggleClass("invalid", invalidFormCell);
+            var clickCounterCell = Cell(0);
+            $("#clickCounter")
+                    .width(20)
+                    .val(clickCounterCell);
+            $("button").click(function () {
+                clickCounterCell.setValue(clickCounterCell.getValue() + 1);
+            });
+
+            var orangeBoxWidth = Cell(function (size) {
+                return Math.max(300, Math.min(600, size.width - 60));
+            }, Cell.auto.viewportSize);
+            var orangeBoxText = Cell(function (over) {
+                return over ? "Inside" : "Orange Box";
+            }, $("#orangeBox").mouseOverCell());
+            $("#orangeBox")
+                    .width(orangeBoxWidth)
+                    .text(orangeBoxText);
+
+            var cursor = $("<div>Bang!!</div>");
+            $("body").append(cursor);
+            cursor.css("background-color", "blue")
+                    .css("position", "absolute")
+                    .css("left", Cell.plus(10, Cell.auto.mousePositionLeft))
+                    .css("top", Cell.plus(10, Cell.auto.mousePositionTop));
+        });
+
+    </script>
+</head>
+<body>
+    <p>Cursor position: <span id="cursorPosition">Jo</span></p>
+
+    <hr>
+
+    <fieldset>
+        <legend>Login:</legend>
+        <div><label for="nameField">Name: </label><input id="nameField" type="text"></div>
+        <div><label for="emailField">Email: </label><input id="emailField" type="text"></div>
+        <div><button>Don't click me</button> <input id="clickCounter" type="text"></div>
+    </fieldset>
+
+    <hr>
+
+    <div id="orangeBox">Orange Box</div>
+
+</body>
+</html>
