@@ -1,0 +1,87 @@
+<!doctype HTML>
+<html>
+<head>
+    <title>Callbacks are so last week (Flapjax edition)</title>
+    <script src="http://flapjax-lang.org/download/flapjax-2.1.js"></script>
+
+    <style>
+        .invalid {
+            border: 2px solid red;
+        }
+        #orangeBox {
+            background: orange;
+            font-weight: bold;
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        function loader() {
+            var mousePositionTextB = liftB(function (p) {return "(" + p.left + ", " + p.top + ")"}, mouseB(document));
+            insertDomB(mousePositionTextB, "cursorPosition");
+
+            var nameB = extractValueB("nameField");
+            var emailB = extractValueB("emailField");
+            function invalidName(predicate) {return predicate ? "invalid" : "valid"}
+            var invalidNameB = liftB(function (name) {return name == ""}, nameB);
+            var invalidEmailB = liftB(function (email) {return email.indexOf("@") == -1}, emailB);
+            var invalidFormB = orB(invalidNameB, invalidEmailB);
+            insertValueB(liftB(invalidName, invalidNameB), 'nameField', 'className');
+            insertValueB(liftB(invalidName, invalidEmailB), 'emailField', 'className');
+            insertValueB(liftB(invalidName, invalidFormB), 'fieldset', 'className');
+
+            var clickCounter = 0;
+            var clickCounterB = $E('clickMeButton', 'click')
+                    .mapE(function () {return ++clickCounter})
+                    .startsWith(clickCounter);
+            insertValueB(clickCounterB, 'clickCounter', 'value');
+
+            function viewportSize() {return {width: window.innerWidth, height: window.innerHeight}}
+            var viewportSizeB = $E(window, 'resize')
+                    .mapE(viewportSize)
+                    .startsWith(viewportSize());
+
+
+            var orangeBoxWidthB = liftB(function (size) {
+                return Math.max(300, Math.min(600, size.width - 60)) + "px";
+            }, viewportSizeB);
+            insertValueB(orangeBoxWidthB, 'orangeBox', 'style', 'width');
+
+            var overBoxB = mergeE(
+                    $E('orangeBox', 'mouseover').constantE(true),
+                    $E('orangeBox', 'mouseout').constantE(false)
+            ).startsWith(false); // TODO this is not necessarily right
+
+            var orangeBoxTextB = liftB(function (over) {
+                return over ? "Inside" : "Orange Box";
+            }, overBoxB);
+            insertValueB(orangeBoxTextB, "orangeBox", "textContent");
+
+            insertValueB("absolute", 'cursor', "style", "position");
+            insertValueB(liftB(function (x) {return x + 10 + "px"}, mouseLeftB(document)), 'cursor', "style", "left");
+            insertValueB(liftB(function (x) {return x + 10 + "px"}, mouseTopB(document)), 'cursor', "style", "top");
+        }
+    </script>
+</head>
+<body onload="loader()" id="body">
+    <div id="cursor">Bang!!</div>
+
+    <p>Cursor position: <span id="cursorPosition">Jo</span></p>
+
+    <hr>
+
+    <fieldset id="fieldset">
+        <legend>Login:</legend>
+        <div><label for="nameField">Name: </label><input id="nameField" type="text"></div>
+        <div><label for="emailField">Email: </label><input id="emailField" type="text"></div>
+        <div><button id="clickMeButton">Don't click me</button> <input id="clickCounter" type="text" style="width: 20px"></div>
+    </fieldset>
+
+    <hr>
+
+    <div id="orangeBox">Orange Box</div>
+
+    <hr>
+</body>
+</html>
