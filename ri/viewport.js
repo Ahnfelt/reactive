@@ -27,21 +27,21 @@ Ri(function() {
 
     innerWidth = w.innerWidth();
     innerHeight = w.innerHeight();
-    w.on('resize.Ri-event', function(event) {
+    w.on('resize.Ri-event', Ri.behavior.callback(function(event) {
         innerWidth = w.innerWidth();
         innerHeight = w.innerHeight();
         Ri.behavior.recompute(Ri.innerWidth);
         Ri.behavior.recompute(Ri.innerHeight);
-    });
+    }));
 
-    w.on('mousemove.Ri-event', function(event) {
+    w.on('mousemove.Ri-event', Ri.behavior.callback(function(event) {
         mouseX = event.pageX;
         mouseY = event.pageY;
         Ri.behavior.recompute(Ri.mouseX);
         Ri.behavior.recompute(Ri.mouseY);
-    });
+    }));
 
-    w.on('mousedown.Ri-event', function(event) {
+    w.on('mousedown.Ri-event', Ri.behavior.callback(function(event) {
         if(event.which === 1) {
             mouseLeft = true;
             Ri.behavior.recompute(Ri.mouseLeft);
@@ -52,9 +52,9 @@ Ri(function() {
             mouseRight = true;
             Ri.behavior.recompute(Ri.mouseRight);
         }
-    });
+    }));
 
-    w.on('mouseup.Ri-event', function(event) {
+    w.on('mouseup.Ri-event', Ri.behavior.callback(function(event) {
         if(event.which === 1) {
             mouseLeft = false;
             Ri.behavior.recompute(Ri.mouseLeft);
@@ -65,6 +65,6 @@ Ri(function() {
             mouseRight = false;
             Ri.behavior.recompute(Ri.mouseRight);
         }
-    });
+    }));
 });
 

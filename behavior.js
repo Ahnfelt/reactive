@@ -109,6 +109,19 @@ function createReactiveBehaviorModule() {
         delete listeners[handle.key];
     }
     
+    // Events may trigger in the middle of executing JavaScript code
+    // in some browsers (sigh), so when adding event handlers to 
+    // external events, it's important to reset the target 
+    // variable for as long as the handler is executing.
+    module.callback = function(handler) {
+        return function() {
+            var oldTarget = target;
+            target = undefined;
+            handler.apply(this, arguments);
+            target = oldTarget;
+        };
+    };
+
     // Removes all ties from and to other behaviors. If this is
     // not called, this behavior will be kept alive in memory
     // by the behaviors it depends on, even if there's no other
