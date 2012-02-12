@@ -18,16 +18,16 @@
                     };
                 });
                 
-                var rightEvent = Ri.behavior.bind(right, function(right) {
+                var rightEvent = Ri.behavior.on(right, function(right) {
                     $('#value').text(right ? "right" : "left");
                 });
 
-                Ri.behavior.bind(mouse, function(mouse) {
+                Ri.behavior.on(mouse, function(mouse) {
                     $('#mouse').text(JSON.stringify(mouse));
                 });
                 
-                Ri.behavior.on(Ri.mouseLeft, function() {
-                    Ri.behavior.off(rightEvent);
+                Ri.behavior.on(Ri.mouseLeft, function(down) {
+                    if(down) Ri.behavior.off(rightEvent);
                 });
             });
         </script>
