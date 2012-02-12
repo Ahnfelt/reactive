@@ -84,23 +84,17 @@ function createReactiveBehaviorModule() {
     };
 
     // Adds an event handler that is executed every time the value
-    // of the behavior changes. A handle is returned that will 
-    // remove the event if passed to .off()
+    // of the behavior changes. It also fires immediately with the
+    // current value of the behavior. A handle is returned that 
+    // will remove the event if passed to .off()
     module.on = function(behavior, handler, thisPointer) {
         var key = 'listener-' + nextId++;
         thisPointer = thisPointer != null ? thisPointer : {};
+        handler.call(thisPointer, behavior());
         behavior.listeners[key] = function(value) {
             handler.call(thisPointer, value);
         };
         return {behavior: behavior, key: key};
-    }
-
-    // Similar to .on(), except it also immediately executes the
-    // handler with the current value of the behavior.
-    module.bind = function(behavior, handler, thisPointer) {
-        var handle = module.on(behavior, handler, thisPointer);
-        handler.call(thisPointer, behavior());
-        return handle;
     }
 
     // Removes an event handler given a handle to it.
